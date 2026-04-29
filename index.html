@@ -2,185 +2,43 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>FlapMaster Deluxe</title>
+<title>Test écran vert</title>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(#70c5ce, #ffffff);
-  text-align: center;
-}
-
-h1 {
-  margin: 10px;
+  background: black;
 }
 
 canvas {
   display: block;
   margin: auto;
-  background: #70c5ce;
-  border: 3px solid black;
-}
-
-#info {
-  font-size: 18px;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🐦 FlapMaster Deluxe</h1>
-<p id="info">Score: 0 | 💰 Coins: 0</p>
-
-<canvas id="game" width="360" height="520"></canvas>
-
-<button onclick="startGame()">▶ Start / Restart</button>
+<canvas id="game" width="400" height="600"></canvas>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let state = "start";
-
-let bird, pipes, score, coins, frame;
-
-function init() {
-  bird = {
-    x: 80,
-    y: 200,
-    radius: 12,
-    velocity: 0,
-    gravity: 0.5,
-    jump: -8
-  };
-
-  pipes = [];
-  score = 0;
-  coins = 0;
-  frame = 0;
-}
-
-function startGame() {
-  init();
-  state = "play";
-}
-
-// contrôle
-document.addEventListener("keydown", () => {
-  if (state === "play") bird.velocity = bird.jump;
-});
-
-document.addEventListener("click", () => {
-  if (state === "play") bird.velocity = bird.jump;
-});
-
-// pipes
-function addPipe() {
-  let gap = 130;
-  let top = Math.random() * 250 + 50;
-
-  pipes.push({
-    x: 360,
-    top: top,
-    bottom: top + gap,
-    width: 50,
-    passed: false
-  });
-}
-
-// collision
-function hit(pipe) {
-  if (
-    bird.x + bird.radius > pipe.x &&
-    bird.x - bird.radius < pipe.x + pipe.width &&
-    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.bottom)
-  ) {
-    state = "gameover";
-  }
-}
-
-// reset
-function reset() {
-  init();
-  state = "start";
-}
-
-// update
+// boucle
 function update() {
-  frame++;
+  // 🟩 écran vert
+  ctx.fillStyle = "green";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // sol
-  ctx.fillStyle = "#d2a679";
-  ctx.fillRect(0, 480, 360, 40);
-
-  if (state === "play") {
-    bird.velocity += bird.gravity;
-    bird.y += bird.velocity;
-
-    if (frame % 120 === 0) addPipe();
-
-    pipes.forEach(p => {
-      p.x -= 2;
-
-      ctx.fillStyle = "green";
-      ctx.fillRect(p.x, 0, p.width, p.top);
-      ctx.fillRect(p.x, p.bottom, p.width, 520);
-
-      hit(p);
-
-      if (!p.passed && p.x + p.width < bird.x) {
-        score++;
-        coins++;
-        p.passed = true;
-
-        document.getElementById("info").innerText =
-          "Score: " + score + " | 💰 Coins: " + coins;
-      }
-    });
-
-    // supprimer pipes
-    pipes = pipes.filter(p => p.x > -60);
-
-    // limites
-    if (bird.y > 480 || bird.y < 0) state = "gameover";
-  }
-
-  // 🐦 oiseau
-  ctx.fillStyle = "yellow";
-  ctx.beginPath();
-  ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-  ctx.fill();
-
-  // écran start
-  if (state === "start") {
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText("Clique Start pour jouer", 80, 250);
-  }
-
-  // game over
-  if (state === "gameover") {
-    ctx.fillStyle = "red";
-    ctx.font = "30px Arial";
-    ctx.fillText("GAME OVER", 90, 240);
-    ctx.font = "16px Arial";
-    ctx.fillText("Clique Start pour recommencer", 60, 280);
-  }
+  // petit texte
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("ECRAN VERT OK 👍", 100, 300);
 
   requestAnimationFrame(update);
 }
 
-init();
 update();
 </script>
 
