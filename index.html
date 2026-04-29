@@ -2,42 +2,137 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Test écran vert</title>
+<title>Flap Game</title>
 
 <style>
 body {
   margin: 0;
-  background: black;
+  text-align: center;
+  font-family: Arial;
+  background: #70c5ce;
 }
 
 canvas {
   display: block;
   margin: auto;
+  background: #70c5ce;
+  border: 2px solid black;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="game" width="400" height="600"></canvas>
+<h2>🐦 Mini Flappy Game</h2>
+<p>Score : <span id="score">0</span></p>
+
+<canvas id="game" width="320" height="480"></canvas>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// boucle
-function update() {
-  // 🟩 écran vert
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+let bird = { x: 60, y: 200, v: 0 };
+let gravity = 0.5;
+let jumpPower = -8;
 
-  // petit texte
-  ctx.fillStyle = "black";
-  ctx.font = "20px Arial";
-  ctx.fillText("ECRAN VERT OK 👍", 100, 300);
+let pipes = [];
+let score = 0;
+let gameOver = false;
+
+// 🐦 saut
+function jump() {
+  if (!gameOver) bird.v = jumpPower;
+}
+
+document.addEventListener("keydown", jump);
+document.addEventListener("click", jump);
+
+// 🕳️ créer obstacles
+function createPipe() {
+  let gap = 120;
+  let top = Math.random() * 200 + 50;
+
+  pipes.push({
+    x: 320,
+    top: top,
+    bottom: top + gap,
+    passed: false
+  });
+}
+
+setInterval(createPipe, 1800);
+
+// 💥 collision
+function hit(pipe) {
+  if (
+    bird.x + 10 > pipe.x &&
+    bird.x - 10 < pipe.x + 40 &&
+    (bird.y < pipe.top || bird.y > pipe.bottom)
+  ) {
+    gameOver = true;
+  }
+}
+
+// 🔁 reset
+function reset() {
+  bird.y = 200;
+  bird.v = 0;
+  pipes = [];
+  score = 0;
+  gameOver = false;
+}
+
+// 🎮 boucle
+function update() {
+  ctx.clearRect(0, 0, 320, 480);
+
+  if (!gameOver) {
+    bird.v += gravity;
+    bird.y += bird.v;
+  }
+
+  // 🐦 oiseau (dessin simple)
+  ctx.fillStyle = "yellow";
+  ctx.beginPath();
+  ctx.arc(bird.x, bird.y, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 🕳️ pipes
+  pipes.forEach(p => {
+    if (!gameOver) p.x -= 2;
+
+    ctx.fillStyle = "green";
+    ctx.fillRect(p.x, 0, 40, p.top);
+    ctx.fillRect(p.x, p.bottom, 40, 480);
+
+    hit(p);
+
+    // ⭐ score seulement si passé
+    if (!p.passed && p.x + 40 < bird.x) {
+      score++;
+      p.passed = true;
+      document.getElementById("score").innerText = score;
+    }
+  });
+
+  // sol / plafond
+  if (bird.y > 480 || bird.y < 0) gameOver = true;
+
+  // 💥 game over
+  if (gameOver) {
+    ctx.fillStyle = "red";
+    ctx.font = "20px Arial";
+    ctx.fillText("GAME OVER", 100, 200);
+    ctx.fillText("Clique pour restart", 80, 240);
+  }
 
   requestAnimationFrame(update);
 }
+
+document.addEventListener("click", () => {
+  if (gameOver) reset();
+});
 
 update();
 </script>
